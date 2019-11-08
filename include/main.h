@@ -55,6 +55,8 @@ extern "C" {
 
 #define CONTROLLER 1
 
+#define WIDTH_OF_BOT 43 //Width of the robot in centimeters
+
 
 Encoder leftEncoder;
 Encoder rightEncoder;

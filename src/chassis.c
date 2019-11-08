@@ -23,20 +23,24 @@ void leftMotorSet(int speed) {
 
 void rightMotorSet(int speed) {
   if (speed > -128 && speed < 128) {
-    motorSet(RL_DRIVE, -speed);
-    motorSet(FL_DRIVE, -speed);
+    motorSet(RR_DRIVE, -speed);
+    motorSet(FR_DRIVE, -speed);
   }
 }
 
-void velocitySet(float translational, float rotational) {
+void velocitySet(double translational, double rotational) {
   //Change sign of rotational
   rotational = -rotational;
-
+  if (translational < 0) translational = 0;//-translational;
   //Scale Values
-  rotational = rotational * MAX_SPEED/2;
-  translational = translational * MAX_SPEED/2;
+  rotational = rotational * MAX_SPEED * 4.5;
+  translational = translational * MAX_SPEED * 4.5;
+  printf("Rotational: %f\n", rotational);
+  printf("Translational: %f\n", translational);
+  printf("Left motor set: %d\n", (int)(translational+rotational));
+  printf("Right motor set: %d\n", (int)(translational-rotational));
 
   //Set speeds
-  leftMotorSet(translational + rotational);
-  rightMotorSet(translational - rotational);
+  leftMotorSet((int)(translational + rotational));
+  rightMotorSet((int)(translational - rotational));
 }

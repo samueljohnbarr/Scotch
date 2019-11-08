@@ -16,6 +16,7 @@
 #include "lidar.h"
 #include "wireless.h"
 #include "usrcmd.h"
+#include "navigate.h"
 
 /*
  * Runs the user operator control code. This function will be started in its own task with the
@@ -53,23 +54,37 @@ void operatorControl() {
     //  chassisSet(0,0);
     chassisSet(power + turn, power - turn);
 
-
 		//**** RIGHT BUTTON SET *****
 		if (joystickGetDigital(CONTROLLER, RIGHT_BUTT_SET, UP_BUTT)) {
-      initLidar();
+			print("Waiting for info...\n");
+			while (!fcount(uart2)) {
+		    //Do nothing
+		  }
+			print("Data found on port!\n");
+			while (fcount(uart2)) {
+				printf("%c\n", fgetc(uart2));
+			}
+			print("Done.\n");
 		}
 
 		if (joystickGetDigital(CONTROLLER, RIGHT_BUTT_SET, DOWN_BUTT)) {
-			lidarScan();
+			navigate();
 		}
 
 		if (joystickGetDigital(CONTROLLER, RIGHT_BUTT_SET, LEFT_BUTT)) {
-      lidarPrintDistances();
-			delay(100); //Debounce
+      int left = encoderGet(leftEncoder);
+			int right = encoderGet(rightEncoder);
+			printf("Left Encoder: %d\n", left);
+			printf("Right Encoder: %d\n\n", right);
+			encoderReset(leftEncoder);
+			encoderReset(rightEncoder);
+			delay(500); //Debounce
 		}
 
 		if (joystickGetDigital(CONTROLLER, RIGHT_BUTT_SET, RIGHT_BUTT)) {
-      lidarShutdown();
+      int target[2];
+			calcTarget(target);
+			printf("Angle: %d\n", target[0]);
 		  delay(100);
 		}
 
@@ -98,16 +113,23 @@ void operatorControl() {
       double velocities[2];
 			wirelessRecieve(velocities);
 			printf("Velocities: %lf | %lf\n", velocities[0], velocities[1]);
-
-
 		}
 
 
 		if (joystickGetDigital(CONTROLLER, LEFT_BUTT_SET, LEFT_BUTT)) {
-
+			  int * dist = lidarGetDistances();
+				int bufSize = 10;
+				char buf[10];
+        for (int i = 0; i < 360; i++) {
+					printf("%d\n", dist[i]);
+					snprintf(buf, bufSize, "%d\n", dist[i]);
+					fputs(buf, uart2);
+				}
+				print("Done.\n");
 		}
 		if (joystickGetDigital(CONTROLLER, LEFT_BUTT_SET, RIGHT_BUTT)) {
-
+       printf("Left encoder: %d\n", encoderGet(leftEncoder));
+			 printf("Right encoder: %d\n", encoderGet(rightEncoder));
 		}
 
     checkCmds();

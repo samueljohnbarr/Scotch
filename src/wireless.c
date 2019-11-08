@@ -10,9 +10,14 @@ char getSentChar();
 void wirelessSend(int * payload, int size) {
     fputc(REQUEST, uart2);
     char ans = getSentChar();
-    printf("Waiting for ACK...");
+    printf("Waiting for ACK...\n");
+    while (ans == 0) {
+      fputc(REQUEST, uart2);
+      ans = getSentChar();
+      print("Retrying Request...\n");
+    }
     if (ans == ACK) {
-      printf("Ack recieved - sending payload");
+      printf("Ack recieved - sending payload\n");
       int buffer_size = 10;
       char buf[buffer_size];
       //Send size of payload to reciever
@@ -22,11 +27,12 @@ void wirelessSend(int * payload, int size) {
       for (int i = 0; i < size; i++) {
         //Send that ish
         snprintf(buf, buffer_size, "%d\n", payload[i]);
-        printf("Sending: %s", buf);
+        //printf("Sending: %s", buf);
         fputs(buf, uart2);
       }
       printf("payload sent\n");
       fputc(STOP, uart2);
+      printf("Waiting for STOP ACK\n");
       ans = fgetc(uart2);
       if (ans != ACK) {
         printf("Reciever did not acknoledge transmission\n");
@@ -45,12 +51,10 @@ void wirelessRecieve(double ret[2]) {
     //Do nothing
   }
   char ans[2][20];
-  printf("Data found on port!\n");
+  printf("Data found on port\n");
   char req = getSentChar();
-  printf("Request bit: %x\n", req);
   if (req == REQUEST) {
     //Acknowledge Request
-    printf("Sending ACK...\n");
     fputc(ACK, uart2);
     printf("ACK sent - recieving payload...\n");
     char a;
@@ -70,6 +74,8 @@ void wirelessRecieve(double ret[2]) {
   }
   //Decode payload into double values
   char * ptr;
+
+  printf("Recieved: %s, %s\n", ans[0], ans[1]);
   ret[0] = strtod(ans[0], &ptr);
   ret[1] = strtod(ans[1], &ptr);
   printf("Payload retrieved\n");

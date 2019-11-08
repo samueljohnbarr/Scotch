@@ -1,3 +1,7 @@
 void chassisSet(int leftSpeed, int rightSpeed);
 
-void velocitySet(int translational, int rotational);
+void velocitySet(double translational, double rotational);
+
+void leftMotorSet(int speed);
+
+void rightMotorSet(int speed);
